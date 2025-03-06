@@ -10,7 +10,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -47,10 +49,17 @@ public class FileProcessingController {
             // Combine the user prompt with file content.
             String combinedPrompt = prompt + "\n\nFile Content:\n" + fileContent;
 
+            // Prepare the JSON payload for the LLM request
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("model", "phi4coder:latest");
+            payload.put("prompt", combinedPrompt);
+            payload.put("stream", false);
+
             // Call the LLM API. Adjust the endpoint and request format as per your LLM service.
             String llmResponse = webClient.post()
-                    .uri("/") // Change the URI if needed
-                    .bodyValue(combinedPrompt)
+                    .uri("/api/generate")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(payload)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
